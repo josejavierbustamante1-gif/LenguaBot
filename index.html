@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LenguaBot Pro — Lengua y Literatura</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#1c1710;
+  --bg2:#231e14;
+  --surface:#2a2318;
+  --card:#322b1c;
+  --ink:#f5ead8;
+  --ink2:#dfd0b4;
+  --ink3:#a89070;
+  --gold:#c9962e;
+  --gold2:#e8bc52;
+  --terra:#a84b2a;
+  --moss:#4a6e45;
+  --blue:#3d6680;
+  --lilac:#7a5c8a;
+  --cream:#f0e6cc;
+  --shadow:0 20px 50px rgba(0,0,0,.55);
+  --r:18px;
+}
+body{
+  font-family:'EB Garamond',serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 10% 15%, rgba(201,150,46,.09) 0%, transparent 40%),
+    radial-gradient(ellipse at 90% 80%, rgba(61,102,128,.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(122,92,138,.05) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+/* Grain overlay */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.45;
+  pointer-events:none;
+  z-index:0;
+}
+
+.screen{display:none;position:relative;z-index:1}
+.screen.active{display:flex}
+
+/* ─── BUTTONS ─── */
+.btn{
+  border:none;
+  border-radius:4px;
+  padding:11px 26px;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  transition:.22s ease;
+  font-family:'Josefin Sans',sans-serif;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1c1710;
+  box-shadow:0 8px 22px rgba(201,150,46,.28);
+}
+.btn-secondary{
+  background:rgba(245,234,216,.07);
+  color:var(--ink2);
+  border:1px solid rgba(245,234,216,.13);
+}
+.btn-danger{
+  background:rgba(168,75,42,.15);
+  color:#e8b09a;
+  border:1px solid rgba(168,75,42,.22);
+}
+
+/* ─── INTRO ─── */
+#intro{
+  min-height:100vh;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:48px 24px 40px;
+  gap:0;
+  text-align:center;
+}
+.intro-header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+  margin-bottom:40px;
+}
+.quill-icon{
+  font-size:72px;
+  animation:sway 4s ease-in-out infinite;
+  filter:drop-shadow(0 8px 20px rgba(201,150,46,.3));
+}
+@keyframes sway{
+  0%,100%{transform:rotate(-4deg) translateY(0)}
+  50%{transform:rotate(4deg) translateY(-8px)}
+}
+.logo{
+  font-family:'Playfair Display',serif;
+  font-size:58px;
+  font-weight:900;
+  line-height:1.05;
+  color:var(--cream);
+  letter-spacing:.02em;
+}
+.logo span{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.logo-subtitle{
+  font-family:'Josefin Sans',sans-serif;
+  font-size:12px;
+  letter-spacing:.35em;
+  text-transform:uppercase;
+  color:var(--ink3);
+  margin-top:6px;
+}
+.tagline{
+  max-width:700px;
+  font-size:17px;
+  color:var(--ink3);
+  line-height:1.85;
+  font-style:italic;
+}
+.divider{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:min(600px,90%);
+  margin:6px auto;
+  color:var(--gold);
+  font-size:18px;
+  opacity:.4;
+}
+.divider::before,.divider::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.top-controls{display:flex;gap:10px;justify-content:center;margin:8px 0 4px}
+.note-small{font-family:'Josefin Sans',sans-serif;font-size:12px;color:var(--ink3);letter-spacing:.05em;margin-top:6px}
+
+.world-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(270px,1fr));
+  gap:20px;
+  width:min(1180px,100%);
+  margin-top:8px;
+}
+.world-card{
+  background:var(--card);
+  border:1px solid rgba(245,234,216,.07);
+  border-radius:var(--r);
+  padding:28px 24px;
+  cursor:pointer;
+  transition:.28s ease;
+  position:relative;
+  overflow:hidden;
+  text-align:left;
+  min-height:220px;
+}
+.world-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,var(--wc1),var(--wc2));
+  opacity:.09;
+  transition:.28s;
+}
+.world-card::after{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,var(--wc1),var(--wc2));
+  opacity:.6;
+}
+.world-card:hover{transform:translateY(-6px) scale(1.01);border-color:rgba(201,150,46,.25)}
+.world-card:hover::before{opacity:.15}
+.world-card>*{position:relative;z-index:1}
+.w-icon{font-size:42px;margin-bottom:12px;display:block}
+.w-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--cream);margin-bottom:7px}
+.w-desc{font-size:14px;color:var(--ink3);line-height:1.7;font-style:italic}
+.w-badge{
+  display:inline-block;
+  margin-top:14px;
+  padding:4px 12px;
+  border-radius:3px;
+  font-family:'Josefin Sans',sans-serif;
+  font-size:10px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  font-weight:700;
+  background:rgba(245,234,216,.06);
+  border:1px solid rgba(245,234,216,.1);
+  color:var(--ink3);
+}
+.w1{--wc1:#c9962e;--wc2:#e8bc52}
+.w2{--wc1:#a84b2a;--wc2:#d07050}
+.w3{--wc1:#4a6e45;--wc2:#7aae74}
+.w4{--wc1:#3d6680;--wc2:#60a0c0}
+.w5{--wc1:#7a5c8a;--wc2:#b090c8}
+.w6{--wc1:#8a7d6a;--wc2:#c0b090}
+
+/* ─── LESSON ─── */
+#lesson{
+  min-height:100vh;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+  gap:22px;
+  text-align:center;
+}
+.lesson-world-icon{font-size:60px;animation:sway 3s ease-in-out infinite}
+.lesson-heading{
+  font-family:'Playfair Display',serif;
+  font-size:36px;
+  font-weight:700;
+  font-style:italic;
+  color:var(--cream);
+}
+.lesson-panel{
+  width:min(920px,100%);
+  background:var(--card);
+  border:1px solid rgba(245,234,216,.08);
+  border-radius:var(--r);
+  padding:34px 36px;
+  box-shadow:var(--shadow);
+  text-align:left;
+}
+.lesson-panel p{font-size:17px;line-height:1.9;color:var(--ink2)}
+.lesson-key{
+  margin:22px 0;
+  background:rgba(201,150,46,.07);
+  border-left:3px solid var(--gold);
+  border-radius:0 10px 10px 0;
+  padding:16px 20px;
+  font-style:italic;
+  color:var(--ink2);
+  font-size:16px;
+  line-height:1.8;
+}
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-top:20px}
+.concept-card{
+  background:rgba(245,234,216,.04);
+  border:1px solid rgba(245,234,216,.07);
+  border-radius:12px;
+  padding:16px;
+}
+.concept-card h4{
+  font-family:'Playfair Display',serif;
+  font-size:16px;
+  color:var(--gold2);
+  margin-bottom:7px;
+}
+.concept-card p{font-size:14px;color:var(--ink3);line-height:1.7}
+
+/* ─── GAME ─── */
+#game{
+  min-height:100vh;
+  flex-direction:column;
+  padding:20px 24px;
+  width:min(1240px,100%);
+  margin:0 auto;
+}
+.game-topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:14px;
+  margin-bottom:18px;
+  border-bottom:1px solid rgba(245,234,216,.07);
+  padding-bottom:16px;
+}
+.level-label{
+  font-family:'Playfair Display',serif;
+  font-size:20px;
+  font-style:italic;
+  color:var(--gold2);
+  margin-bottom:8px;
+}
+.prog-track{width:220px;height:5px;border-radius:999px;background:rgba(245,234,216,.08);overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:999px;transition:width .4s ease}
+.hud{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chip{
+  background:var(--card);
+  border:1px solid rgba(245,234,216,.08);
+  border-radius:6px;
+  padding:8px 16px;
+  font-family:'Josefin Sans',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.03em;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+.timer-widget{
+  min-width:180px;
+  background:var(--card);
+  border:1px solid rgba(245,234,216,.08);
+  border-radius:10px;
+  padding:10px 14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+.timer-row{display:flex;justify-content:space-between;align-items:center;font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:7px}
+.timer-val{color:var(--gold2);font-weight:700;font-size:15px}
+.timer-track{height:6px;border-radius:999px;background:rgba(245,234,216,.07);overflow:hidden}
+.timer-bar{height:100%;width:100%;background:linear-gradient(90deg,var(--moss),var(--gold),var(--terra));border-radius:999px;transition:width .95s linear}
+
+.game-body{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start;margin-top:4px}
+.pane{
+  background:var(--card);
+  border:1px solid rgba(245,234,216,.07);
+  border-radius:var(--r);
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+.pane-label{
+  font-family:'Josefin Sans',sans-serif;
+  font-size:11px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--ink3);
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.pane-label::after{content:'';flex:1;height:1px;background:rgba(245,234,216,.07)}
+.mission-text{font-size:15px;color:var(--ink3);line-height:1.75;font-style:italic;margin-bottom:14px}
+.fragment{
+  background:rgba(245,234,216,.04);
+  border:1px solid rgba(245,234,216,.08);
+  border-radius:12px;
+  padding:20px 22px;
+  font-size:18px;
+  line-height:1.9;
+  color:var(--cream);
+  font-style:italic;
+  min-height:160px;
+  display:flex;
+  align-items:center;
+  white-space:pre-wrap;
+  position:relative;
+}
+.fragment::before{
+  content:'\201C';
+  position:absolute;
+  top:-10px;left:14px;
+  font-size:64px;
+  color:var(--gold);
+  opacity:.18;
+  font-family:'Playfair Display',serif;
+  line-height:1;
+}
+.hint{
+  margin-top:14px;
+  background:rgba(61,102,128,.12);
+  border-left:3px solid var(--blue);
+  border-radius:0 10px 10px 0;
+  padding:12px 16px;
+  font-size:14px;
+  color:#a0c0d8;
+  line-height:1.75;
+}
+.question-label{
+  font-family:'Playfair Display',serif;
+  font-size:17px;
+  font-weight:700;
+  color:var(--gold2);
+  margin-bottom:14px;
+  line-height:1.5;
+}
+.options{display:grid;gap:12px}
+.opt{
+  background:rgba(245,234,216,.04);
+  border:1px solid rgba(245,234,216,.08);
+  border-radius:12px;
+  padding:15px 18px;
+  cursor:pointer;
+  transition:.2s ease;
+  text-align:left;
+}
+.opt:hover{transform:translateX(4px);border-color:rgba(201,150,46,.3);background:rgba(201,150,46,.06)}
+.opt.chosen{border-color:var(--gold);background:rgba(201,150,46,.1)}
+.opt.correct{border-color:var(--moss);background:rgba(74,110,69,.15)}
+.opt.wrong{border-color:var(--terra);background:rgba(168,75,42,.14)}
+.opt-title{font-family:'EB Garamond',serif;font-weight:600;font-size:16px;margin-bottom:3px;color:var(--cream)}
+.opt-desc{font-size:13px;color:var(--ink3);line-height:1.6;font-style:italic}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.side-note{margin-top:16px;background:rgba(245,234,216,.03);border-radius:10px;padding:14px 16px;border:1px solid rgba(245,234,216,.06)}
+.side-note h4{font-family:'Playfair Display',serif;font-size:14px;color:var(--gold2);margin-bottom:7px;font-style:italic}
+.side-note p{font-size:14px;color:var(--ink3);line-height:1.7}
+
+/* ─── FEEDBACK ─── */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(10,9,6,.65);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  z-index:99;
+  backdrop-filter:blur(4px);
+}
+.overlay.show{display:flex}
+.fb-card{
+  width:min(520px,100%);
+  background:#261f12;
+  border:1px solid rgba(245,234,216,.1);
+  border-radius:20px;
+  padding:36px 32px;
+  text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);
+  position:relative;
+  overflow:hidden;
+}
+.fb-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));
+}
+.fb-icon{font-size:56px;margin-bottom:12px;display:block}
+.fb-title{
+  font-family:'Playfair Display',serif;
+  font-size:28px;
+  font-weight:700;
+  color:var(--cream);
+  margin-bottom:10px;
+}
+.fb-msg{font-size:16px;color:var(--ink3);line-height:1.85;margin-bottom:22px;font-style:italic}
+.fb-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ─── CONFETTI ─── */
+.confetti-dot{
+  position:fixed;
+  border-radius:2px;
+  animation:fall 1.9s ease-in forwards;
+  pointer-events:none;
+  z-index:120;
+}
+@keyframes fall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+/* ─── FLOATIES ─── */
+.floaty{
+  position:fixed;
+  color:rgba(245,234,216,.07);
+  animation:rise 18s linear infinite;
+  pointer-events:none;
+  z-index:0;
+  user-select:none;
+  font-family:'EB Garamond',serif;
+}
+@keyframes rise{
+  from{transform:translateY(110vh);opacity:0}
+  10%{opacity:1}
+  90%{opacity:1}
+  to{transform:translateY(-15vh);opacity:0}
+}
+
+/* ─── COMPLETE SCREEN ─── */
+#complete{
+  min-height:100vh;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+  gap:24px;
+  text-align:center;
+}
+.complete-icon{font-size:88px;animation:sway 3s ease-in-out infinite}
+.complete-title{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--cream)}
+.complete-sub{font-size:18px;color:var(--ink3);font-style:italic;max-width:560px;line-height:1.9}
+.complete-score{
+  font-family:'Playfair Display',serif;
+  font-size:72px;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+@media(max-width:1080px){.world-grid{grid-template-columns:repeat(2,minmax(260px,1fr))}}
+@media(max-width:860px){.game-body{grid-template-columns:1fr}.logo{font-size:44px}}
+@media(max-width:640px){.world-grid{grid-template-columns:1fr}.logo{font-size:36px}.fragment{font-size:16px}}
+
+/* ─── NAME INPUT SCREEN ─── */
+#nameScreen{
+  min-height:100vh;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+  gap:28px;
+  text-align:center;
+}
+.name-quill{font-size:64px;animation:sway 4s ease-in-out infinite}
+.name-title{
+  font-family:'Playfair Display',serif;
+  font-size:46px;
+  font-weight:900;
+  color:var(--cream);
+}
+.name-title span{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.name-subtitle{font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink3);margin-top:4px}
+.name-box{
+  width:min(500px,90%);
+  background:var(--card);
+  border:1px solid rgba(245,234,216,.1);
+  border-radius:var(--r);
+  padding:36px 32px;
+  box-shadow:var(--shadow);
+}
+.name-box label{
+  display:block;
+  font-family:'Josefin Sans',sans-serif;
+  font-size:11px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--ink3);
+  margin-bottom:12px;
+}
+.name-input{
+  width:100%;
+  background:rgba(245,234,216,.05);
+  border:1px solid rgba(201,150,46,.3);
+  border-radius:8px;
+  padding:14px 18px;
+  font-family:'Playfair Display',serif;
+  font-size:20px;
+  color:var(--cream);
+  outline:none;
+  transition:.2s ease;
+  text-align:center;
+}
+.name-input:focus{border-color:var(--gold);background:rgba(201,150,46,.08);box-shadow:0 0 0 3px rgba(201,150,46,.12)}
+.name-input::placeholder{color:var(--ink3);font-style:italic}
+
+/* ─── AUTHOR BADGE ─── */
+.author-bar{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:rgba(245,234,216,.04);
+  border:1px solid rgba(245,234,216,.08);
+  border-radius:999px;
+  padding:10px 22px 10px 10px;
+  margin-top:4px;
+}
+.author-avatar{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  border:2px solid var(--gold);
+  box-shadow:0 0 0 3px rgba(201,150,46,.2), 0 6px 18px rgba(0,0,0,.4);
+  object-fit:cover;
+  flex-shrink:0;
+}
+.author-info{text-align:left}
+.author-label{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3)}
+.author-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold2)}
+
+/* ─── PLAYER CHIP IN GAME ─── */
+.player-chip{
+  background:var(--card);
+  border:1px solid rgba(201,150,46,.2);
+  border-radius:6px;
+  padding:8px 14px;
+  font-family:'Josefin Sans',sans-serif;
+  font-size:12px;
+  color:var(--gold2);
+  font-weight:700;
+  letter-spacing:.04em;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     NAME ENTRY SCREEN
+════════════════════════════════════════════════════ -->
+<section id="nameScreen" class="screen active">
+  <div class="name-quill">✒️</div>
+  <div>
+    <div class="name-title">Lengua<span>Bot</span> Pro</div>
+    <div class="name-subtitle">Laboratorio de Lengua Castellana y Literatura</div>
+  </div>
+  <div class="name-box">
+    <label>👤 Escribe tu nombre para comenzar</label>
+    <input class="name-input" id="playerNameInput" type="text" placeholder="Tu nombre aquí..." maxlength="40"/>
+  </div>
+  <button class="btn btn-primary" onclick="submitName()" style="font-size:16px;padding:14px 40px">Ingresar al laboratorio →</button>
+  <div class="author-bar">
+    <img class="author-avatar" src="data:image/jpeg;base64,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" alt="José Bustamante"/>
+    <div class="author-info">
+      <div class="author-label">Creado por</div>
+      <div class="author-name">José Bustamante</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     INTRO
+════════════════════════════════════════════════════ -->
+<section id="intro" class="screen">
+  <div class="intro-header">
+    <div class="quill-icon">✒️</div>
+    <div>
+      <div class="logo">Lengua<span>Bot</span> Pro</div>
+      <div class="logo-subtitle">Laboratorio de Lengua Castellana y Literatura</div>
+    </div>
+    <p class="tagline">Explora seis mundos literarios y lingüísticos: ortografía, tipos de texto, comunicación, semántica, morfología y literatura universal, con temporizador, sonidos y retos interactivos.</p>
+    <div class="divider">✦</div>
+    <div class="top-controls">
+      <button class="btn btn-secondary" onclick="toggleSound()" id="soundBtn">🔊 Sonido ON</button>
+    </div>
+    <p class="note-small">Elige un mundo · 100 pts por acierto · 3 vidas · 25 s por nivel</p>
+  </div>
+  <div class="author-bar" style="margin-bottom:4px">
+    <img class="author-avatar" src="data:image/jpeg;base64,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" alt="José Bustamante"/>
+    <div class="author-info">
+      <div class="author-label">Creado por</div>
+      <div class="author-name">José Bustamante</div>
+    </div>
+  </div>
+
+  <div class="world-grid">
+
+    <article class="world-card w1" onclick="startWorld(1)">
+      <span class="w-icon">🖊️</span>
+      <div class="w-name">Taller de Ortografía</div>
+      <div class="w-desc">Domina las reglas del uso correcto de la escritura: tilde, puntuación y mayúsculas.</div>
+      <span class="w-badge">Ortografía</span>
+    </article>
+
+    <article class="world-card w2" onclick="startWorld(2)">
+      <span class="w-icon">📄</span>
+      <div class="w-name">Fábrica de Textos</div>
+      <div class="w-desc">Identifica y comprende tipos textuales: narrativo, descriptivo, expositivo, argumentativo y dialogado.</div>
+      <span class="w-badge">Tipos de texto</span>
+    </article>
+
+    <article class="world-card w3" onclick="startWorld(3)">
+      <span class="w-icon">💬</span>
+      <div class="w-name">Canal Comunicativo</div>
+      <div class="w-desc">Reconoce los elementos de la comunicación: emisor, receptor, mensaje, código, canal y contexto.</div>
+      <span class="w-badge">Comunicación</span>
+    </article>
+
+    <article class="world-card w4" onclick="startWorld(4)">
+      <span class="w-icon">🔤</span>
+      <div class="w-name">Universo Semántico</div>
+      <div class="w-desc">Analiza el significado de las palabras: sinónimos, antónimos, polisemia y campo semántico.</div>
+      <span class="w-badge">Semántica</span>
+    </article>
+
+    <article class="world-card w5" onclick="startWorld(5)">
+      <span class="w-icon">⚗️</span>
+      <div class="w-name">Laboratorio Morfológico</div>
+      <div class="w-desc">Estudia la estructura de las palabras: sustantivo, adjetivo, verbo, adverbio y sus funciones.</div>
+      <span class="w-badge">Morfología</span>
+    </article>
+
+    <article class="world-card w6" onclick="startWorld(6)">
+      <span class="w-icon">🌍</span>
+      <div class="w-name">Clásicos del Mundo</div>
+      <div class="w-desc">Viaja por la literatura universal: épica, novela, lírica y teatro de distintas culturas y épocas.</div>
+      <span class="w-badge">Literatura universal</span>
+    </article>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     LESSON
+════════════════════════════════════════════════════ -->
+<section id="lesson" class="screen">
+  <div class="lesson-world-icon" id="lessonIcon">📘</div>
+  <div class="lesson-heading" id="lessonTitle">Lección</div>
+  <div class="lesson-panel">
+    <p id="lessonText"></p>
+    <div class="lesson-key" id="lessonKey"></div>
+    <div class="concept-grid" id="lessonConcepts"></div>
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-primary" onclick="startGame()">Comenzar el reto →</button>
+    <button class="btn btn-secondary" onclick="goHome()">Volver al inicio</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     GAME
+════════════════════════════════════════════════════ -->
+<section id="game" class="screen">
+  <div class="game-topbar">
+    <div>
+      <div class="level-label" id="levelLabel">Mundo — Nivel 1</div>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+    <div class="hud">
+      <div class="player-chip">👤 <span id="playerChip">Jugador</span></div>
+      <div class="chip">⭐ <span id="scoreDisplay">0</span> pts</div>
+      <div class="chip" id="livesDisplay">❤️❤️❤️</div>
+      <div class="timer-widget">
+        <div class="timer-row">
+          <span>Tiempo</span>
+          <span class="timer-val" id="timerText">25 s</span>
+        </div>
+        <div class="timer-track"><div class="timer-bar" id="timerBar"></div></div>
+      </div>
+      <button class="btn btn-secondary" onclick="toggleSound()">🔊/🔇</button>
+      <button class="btn btn-secondary" onclick="goHome()">🏠 Inicio</button>
+    </div>
+  </div>
+
+  <div class="game-body">
+    <div class="pane">
+      <div class="pane-label">✦ Situación o fragmento</div>
+      <p class="mission-text" id="missionText"></p>
+      <div class="fragment" id="fragmentBox"></div>
+      <div class="hint" id="hintBox"></div>
+    </div>
+    <div class="pane">
+      <div class="pane-label">✦ Pregunta</div>
+      <div class="question-label" id="questionText"></div>
+      <div class="options" id="optionsBox"></div>
+      <div class="action-row">
+        <button class="btn btn-primary" onclick="checkAnswer()">Responder</button>
+        <button class="btn btn-danger" onclick="clearSelection()">Limpiar</button>
+      </div>
+      <div class="side-note">
+        <h4>✍️ Recuerda</h4>
+        <p id="rememberText">Lee con atención el fragmento antes de responder.</p>
+      </div>
+      <div class="side-note">
+        <h4>🏅 Meta del nivel</h4>
+        <p id="goalText">Aplicar el concepto del mundo para elegir la respuesta correcta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     COMPLETE
+════════════════════════════════════════════════════ -->
+<section id="complete" class="screen">
+  <div class="complete-icon">🏆</div>
+  <div class="complete-title">¡Mundo completado!</div>
+  <div class="complete-score" id="completeFinalScore">0 pts</div>
+  <div class="complete-sub" id="completeSub">Has superado todos los niveles de este mundo con éxito.</div>
+  <button class="btn btn-primary" onclick="goHome()" style="margin-top:8px">Volver al inicio</button>
+</section>
+
+<!-- ─── FEEDBACK OVERLAY ─── -->
+<div class="overlay" id="fbOverlay">
+  <div class="fb-card">
+    <span class="fb-icon" id="fbIcon">🎉</span>
+    <div class="fb-title" id="fbTitle">¡Correcto!</div>
+    <div class="fb-msg" id="fbMsg"></div>
+    <div class="fb-actions">
+      <button class="btn btn-primary" id="nextBtn" onclick="nextLevel()">Siguiente nivel</button>
+      <button class="btn btn-secondary" onclick="retryLevel()">Reintentar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   WORLD DATA
+══════════════════════════════════ */
+const WORLDS = {
+  1:{
+    name:'Taller de Ortografía',
+    lesson:{
+      icon:'🖊️',
+      title:'Ortografía: tilde, puntuación y mayúsculas',
+      text:'La ortografía regula la escritura correcta de las palabras. Una buena ortografía es indispensable para comunicar con claridad y precisión. En este mundo trabajarás el acento gráfico, el uso de signos de puntuación y las mayúsculas.',
+      key:'Clave: la tilde indica la sílaba tónica; la puntuación estructura el sentido; las mayúsculas distinguen nombres y límites oracionales.',
+      concepts:[
+        {t:'Tilde diacrítica',d:'Distingue palabras iguales con significados distintos (él / el, tú / tu).'},
+        {t:'Reglas de acentuación',d:'Agudas, llanas, esdrújulas y sobreesdrújulas tienen reglas precisas.'},
+        {t:'Coma',d:'Separa elementos en una lista o conecta oraciones con pausas breves.'},
+        {t:'Mayúscula',d:'Se usa en nombres propios, inicio de oración y títulos.'}
+      ]
+    },
+    levels:[
+      {
+        mission:'Selecciona la opción escrita correctamente.',
+        fragment:'Cuatro formas de escribir la misma palabra. Solo una es correcta.',
+        hint:'Las palabras esdrújulas siempre llevan tilde.',
+        question:'¿Cuál de estas palabras está escrita correctamente?',
+        options:[
+          {t:'Musica',d:'Le falta el acento gráfico.'},
+          {t:'Música',d:'Palabra esdrújula, lleva tilde en la primera sílaba.'},
+          {t:'Musíca',d:'El acento está mal ubicado.'},
+          {t:'Músíca',d:'No puede llevar dos tildes.'}
+        ],
+        correct:1,
+        explanation:'Música es esdrújula (el golpe recae en MÚ) y toda esdrújula lleva tilde obligatoriamente.',
+        remember:'Clasifica la palabra en aguda, llana o esdrújula antes de tildarla.',
+        goal:'Aplicar la regla de acentuación de las palabras esdrújulas.'
+      },
+      {
+        mission:'Elige la oración con puntuación correcta.',
+        fragment:'"Cuando llegué al mercado vi a mi vecina comprando frutas verduras y flores."',
+        hint:'Una lista de elementos necesita comas para separarlos con claridad.',
+        question:'¿Cuál es la versión con puntuación correcta?',
+        options:[
+          {t:'Frutas verduras, y flores.',d:'La coma entre "y" y el último elemento es innecesaria.'},
+          {t:'Frutas, verduras y flores.',d:'Comas entre elementos y "y" antes del último: forma estándar.'},
+          {t:'Frutas, verduras, y, flores.',d:'Exceso de comas altera la fluidez.'},
+          {t:'Frutas verduras y flores.',d:'Sin comas, la lista pierde claridad.'}
+        ],
+        correct:1,
+        explanation:'En una enumeración se separan los elementos con coma, excepto antes del último nexo "y".',
+        remember:'La coma ante "y" final no es necesaria en enumeraciones simples.',
+        goal:'Puntuar correctamente enumeraciones.'
+      },
+      {
+        mission:'Identifica el uso correcto de la mayúscula.',
+        fragment:'"el río amazonas nace en perú y desemboca en el atlántico."',
+        hint:'Los nombres geográficos propios llevan mayúscula inicial.',
+        question:'¿Cuál versión tiene mayúsculas correctas?',
+        options:[
+          {t:'El Río Amazonas nace en Perú y desemboca en el Atlántico.',d:'Correcto: nombre propio, inicio de oración y topónimo.'},
+          {t:'El río Amazonas nace en Perú y desemboca en el atlántico.',d:'El océano Atlántico es nombre propio.'},
+          {t:'el río amazonas nace en perú y desemboca en el atlántico.',d:'Ningún nombre lleva mayúscula.'},
+          {t:'El Río amazonas Nace en Perú y Desemboca en el Atlántico.',d:'Las mayúsculas están mal distribuidas.'}
+        ],
+        correct:0,
+        explanation:'Los topónimos (Amazonas, Perú, Atlántico) y el inicio de la oración llevan mayúscula.',
+        remember:'Los nombres propios de lugares siempre se escriben con mayúscula inicial.',
+        goal:'Aplicar el uso correcto de mayúsculas en contexto geográfico.'
+      },
+      {
+        mission:'Distingue la tilde diacrítica.',
+        fragment:'"___ libro que me prestaste es de ___ que vive cerca."',
+        hint:'Una de las palabras "el" es pronombre personal y la otra es artículo.',
+        question:'¿Cuál versión completa correctamente los espacios?',
+        options:[
+          {t:'El libro… de él',d:'Artículo sin tilde y pronombre con tilde.'},
+          {t:'Él libro… de el',d:'Artículo con tilde y pronombre sin tilde: invertido.'},
+          {t:'El libro… de el',d:'Ninguno lleva tilde.'},
+          {t:'Él libro… de él',d:'Los dos llevan tilde: incorrecto.'}
+        ],
+        correct:0,
+        explanation:'"El" artículo no lleva tilde; "él" pronombre personal sí lleva tilde diacrítica.',
+        remember:'La tilde diacrítica distingue palabras con igual forma pero diferente función.',
+        goal:'Diferenciar artículo y pronombre mediante la tilde diacrítica.'
+      },
+      {
+        mission:'Elige la palabra con acentuación correcta.',
+        fragment:'Palabras llanas que terminan en consonante distinta de n o s.',
+        hint:'Las palabras llanas llevan tilde solo si terminan en consonante que NO sea n ni s.',
+        question:'¿Cuál de estas palabras llanas lleva tilde correctamente?',
+        options:[
+          {t:'Árbol',d:'Termina en l: llana con tilde. Correcto.'},
+          {t:'Cármen',d:'Termina en n: llana sin tilde. Incorrecto.'},
+          {t:'Jóven',d:'Termina en n: llana sin tilde. Incorrecto.'},
+          {t:'Résumen',d:'Termina en n: llana sin tilde. Incorrecto.'}
+        ],
+        correct:0,
+        explanation:'Árbol es llana y termina en "l" (consonante distinta de n o s), por eso lleva tilde.',
+        remember:'Llanas sin tilde si terminan en vocal, n o s; con tilde en los demás casos.',
+        goal:'Consolidar la regla de acentuación de las palabras llanas.'
+      }
+    ]
+  },
+  2:{
+    name:'Fábrica de Textos',
+    lesson:{
+      icon:'📄',
+      title:'Tipos de texto y sus características',
+      text:'Los textos pueden clasificarse según su intención y estructura. Reconocer el tipo textual ayuda a comprender mejor su propósito y a producir escritura apropiada para cada situación comunicativa.',
+      key:'Clave: narrativo = contar; descriptivo = mostrar; expositivo = explicar; argumentativo = convencer; dialogado = intercambiar.',
+      concepts:[
+        {t:'Narrativo',d:'Cuenta acciones y hechos con un orden temporal.'},
+        {t:'Descriptivo',d:'Representa detalladamente personas, lugares u objetos.'},
+        {t:'Expositivo',d:'Explica información de manera objetiva y ordenada.'},
+        {t:'Argumentativo',d:'Defiende una postura con razones y evidencias.'}
+      ]
+    },
+    levels:[
+      {
+        mission:'Identifica el tipo de texto.',
+        fragment:'"El fotoperiodismo es una forma de periodismo que emplea imágenes para contar noticias. Sus raíces se remontan al siglo XIX cuando la fotografía comenzó a documentar eventos históricos."',
+        hint:'El texto explica un tema con datos objetivos y sin intención de convencer.',
+        question:'¿A qué tipo textual corresponde principalmente?',
+        options:[
+          {t:'Narrativo',d:'Cuenta acciones y sucesos.'},
+          {t:'Argumentativo',d:'Defiende una tesis con razones.'},
+          {t:'Expositivo',d:'Explica información de manera objetiva.'},
+          {t:'Descriptivo',d:'Pinta con palabras una realidad.'}
+        ],
+        correct:2,
+        explanation:'Es expositivo porque presenta información clara y objetiva sobre el fotoperiodismo sin emitir juicios.',
+        remember:'El expositivo informa; el argumentativo convence.',
+        goal:'Reconocer el texto expositivo por su intención informativa.'
+      },
+      {
+        mission:'Reconoce la intención del texto.',
+        fragment:'"El uso del teléfono en el aula disminuye la atención y perjudica el aprendizaje. Por estas razones, debería prohibirse su uso durante las clases."',
+        hint:'Hay una postura clara y razones que la sustentan.',
+        question:'¿Qué tipo de texto predomina aquí?',
+        options:[
+          {t:'Descriptivo',d:'Solo presenta rasgos sin postura.'},
+          {t:'Narrativo',d:'Cuenta hechos con personajes.'},
+          {t:'Expositivo',d:'Informa sin tomar partido.'},
+          {t:'Argumentativo',d:'Defiende una postura con argumentos.'}
+        ],
+        correct:3,
+        explanation:'Es argumentativo porque presenta una tesis (prohibir el celular) respaldada por razones.',
+        remember:'La presencia de una tesis y argumentos define al texto argumentativo.',
+        goal:'Distinguir el texto argumentativo por su postura e intención persuasiva.'
+      },
+      {
+        mission:'Reconoce la función descriptiva.',
+        fragment:'"La cabaña tenía paredes de troncos cubiertos de musgo, una chimenea de piedra gris y ventanas pequeñas por las que entraba una luz amarillenta al atardecer."',
+        hint:'El texto pinta con detalle un lugar, sin contar hechos ni dar opiniones.',
+        question:'¿Cuál es el tipo de texto?',
+        options:[
+          {t:'Descriptivo',d:'Representa en detalle rasgos de un lugar.'},
+          {t:'Narrativo',d:'Cuenta acciones y sucesos.'},
+          {t:'Argumentativo',d:'Defiende una postura.'},
+          {t:'Dialogado',d:'Reproduce la voz de interlocutores.'}
+        ],
+        correct:0,
+        explanation:'Es descriptivo porque presenta con detalle las características visuales de la cabaña.',
+        remember:'El texto descriptivo retrata: usa adjetivos y detalles sensoriales.',
+        goal:'Identificar el texto descriptivo por sus rasgos sensoriales.'
+      },
+      {
+        mission:'Ubica el texto narrativo.',
+        fragment:'"Una mañana, Andrés encontró una carta en el buzón sin remitente. La abrió despacio, leyó las primeras líneas y palideció."',
+        hint:'Hay personaje, acciones y un orden temporal.',
+        question:'¿Qué tipo de texto representa este fragmento?',
+        options:[
+          {t:'Expositivo',d:'Solo presenta información objetiva.'},
+          {t:'Descriptivo',d:'Describe sin acción.'},
+          {t:'Narrativo',d:'Cuenta acciones de un personaje en el tiempo.'},
+          {t:'Argumentativo',d:'Defiende una postura.'}
+        ],
+        correct:2,
+        explanation:'Es narrativo porque cuenta una secuencia de acciones protagonizadas por Andrés.',
+        remember:'La narración avanza en el tiempo: primero, luego, después.',
+        goal:'Reconocer el texto narrativo por sus acciones y personajes.'
+      },
+      {
+        mission:'Completa la fábrica de textos.',
+        fragment:'— Buenos días. ¿Tiene reserva?\n— Sí, a nombre de Vega.\n— Perfecto, su mesa está lista.',
+        hint:'El texto se organiza en turnos de intervención entre dos personas.',
+        question:'¿A qué tipo de texto corresponde?',
+        options:[
+          {t:'Expositivo',d:'Informa de forma objetiva.'},
+          {t:'Narrativo',d:'Cuenta hechos con narrador.'},
+          {t:'Descriptivo',d:'Retrata rasgos y detalles.'},
+          {t:'Dialogado',d:'Reproduce el intercambio directo entre personas.'}
+        ],
+        correct:3,
+        explanation:'Es un texto dialogado porque se estructura en turnos de habla entre dos interlocutores.',
+        remember:'El texto dialogado reproduce la comunicación directa con guiones o comillas.',
+        goal:'Identificar el texto dialogado por su estructura conversacional.'
+      }
+    ]
+  },
+  3:{
+    name:'Canal Comunicativo',
+    lesson:{
+      icon:'💬',
+      title:'Elementos de la comunicación',
+      text:'Todo acto comunicativo implica una serie de elementos que hacen posible que el mensaje llegue correctamente. Conocerlos permite analizar cómo funciona la comunicación en distintas situaciones.',
+      key:'Clave: emisor → codifica el mensaje; receptor → lo decodifica; canal → medio de transmisión; código → sistema de signos.',
+      concepts:[
+        {t:'Emisor',d:'Quien produce y envía el mensaje.'},
+        {t:'Receptor',d:'Quien recibe e interpreta el mensaje.'},
+        {t:'Mensaje',d:'Contenido que se comunica.'},
+        {t:'Canal',d:'Medio físico por el que viaja el mensaje.'}
+      ]
+    },
+    levels:[
+      {
+        mission:'Identifica el emisor.',
+        fragment:'Un locutor de radio lee el parte meteorológico del día a los oyentes de la ciudad.',
+        hint:'Piensa en quién produce y emite el mensaje en esta situación.',
+        question:'¿Quién es el emisor en esta situación comunicativa?',
+        options:[
+          {t:'Los oyentes',d:'Ellos reciben el mensaje.'},
+          {t:'El locutor',d:'Él produce y transmite el mensaje.'},
+          {t:'La radio',d:'Es el canal, no el emisor.'},
+          {t:'El parte meteorológico',d:'Es el mensaje, no el emisor.'}
+        ],
+        correct:1,
+        explanation:'El locutor es el emisor porque produce y envía el mensaje a través de la radio.',
+        remember:'El emisor es quien inicia el acto comunicativo.',
+        goal:'Identificar el rol del emisor en una situación concreta.'
+      },
+      {
+        mission:'Reconoce el canal.',
+        fragment:'Ana envía un mensaje de voz a su madre por WhatsApp preguntando a qué hora cena.',
+        hint:'El canal es el medio físico o tecnológico que transporta el mensaje.',
+        question:'¿Cuál es el canal de comunicación en este caso?',
+        options:[
+          {t:'La pregunta sobre la cena',d:'Eso es el mensaje.'},
+          {t:'Ana',d:'Ella es la emisora.'},
+          {t:'La madre',d:'Ella es la receptora.'},
+          {t:'WhatsApp / teléfono',d:'Es el medio que transporta el mensaje.'}
+        ],
+        correct:3,
+        explanation:'El canal es WhatsApp (y el dispositivo móvil): el medio que transporta el mensaje de voz.',
+        remember:'El canal puede ser oral, escrito, visual o digital.',
+        goal:'Distinguir el canal de los demás elementos de la comunicación.'
+      },
+      {
+        mission:'Detecta el código.',
+        fragment:'Un semáforo en rojo indica que los vehículos deben detenerse.',
+        hint:'El código es el sistema de signos utilizado para construir el mensaje.',
+        question:'¿Cuál es el código en esta situación?',
+        options:[
+          {t:'Los vehículos',d:'Son los receptores del mensaje.'},
+          {t:'El semáforo',d:'Es el canal que transmite la señal.'},
+          {t:'El código de señales de tránsito',d:'Sistema de signos (colores) con significados acordados.'},
+          {t:'La calle',d:'Es el contexto físico.'}
+        ],
+        correct:2,
+        explanation:'El código es el sistema de señales de tránsito: los colores tienen significados convencionales compartidos.',
+        remember:'El código debe ser compartido por emisor y receptor para que haya comunicación.',
+        goal:'Identificar el código como sistema de signos en una situación no verbal.'
+      },
+      {
+        mission:'Reconoce el ruido o interferencia.',
+        fragment:'Pedro intenta escuchar las instrucciones de su profesor, pero el ruido del patio hace que no entienda la mitad de lo que dice.',
+        hint:'En comunicación, "ruido" es cualquier factor que distorsiona el mensaje.',
+        question:'¿Qué elemento altera la comunicación en esta situación?',
+        options:[
+          {t:'El mensaje del profesor',d:'Es lo que se intenta transmitir.'},
+          {t:'El ruido del patio',d:'Es la interferencia que dificulta la recepción.'},
+          {t:'Pedro',d:'Es el receptor.'},
+          {t:'El aula',d:'Es el contexto o canal.'}
+        ],
+        correct:1,
+        explanation:'El ruido del patio es una interferencia que dificulta la decodificación del mensaje por parte del receptor.',
+        remember:'El ruido puede ser físico, psicológico o semántico.',
+        goal:'Reconocer la interferencia como perturbación del proceso comunicativo.'
+      },
+      {
+        mission:'Completa el circuito comunicativo.',
+        fragment:'La Cruz Roja lanza una campaña con afiches en la ciudad para pedir donaciones de sangre.',
+        hint:'Identifica los cinco elementos básicos del acto comunicativo.',
+        question:'¿Cuál es la descripción más completa y correcta?',
+        options:[
+          {t:'Emisor: ciudadanos; receptor: Cruz Roja; canal: afiches',d:'Los roles están invertidos.'},
+          {t:'Emisor: Cruz Roja; receptor: ciudadanos; canal: afiches; mensaje: donación de sangre',d:'Descripción correcta de todos los elementos.'},
+          {t:'Emisor: afiches; receptor: ciudadanos; canal: ciudad',d:'El afiche es el canal, no el emisor.'},
+          {t:'Emisor: Cruz Roja; receptor: hospitales; canal: radio',d:'El receptor y el canal no corresponden.'}
+        ],
+        correct:1,
+        explanation:'La Cruz Roja es el emisor, los ciudadanos son receptores, los afiches son el canal y la donación es el mensaje.',
+        remember:'Analiza cada elemento por separado para no confundirlos.',
+        goal:'Integrar todos los elementos de la comunicación en un análisis completo.'
+      }
+    ]
+  },
+  4:{
+    name:'Universo Semántico',
+    lesson:{
+      icon:'🔤',
+      title:'Semántica: significado de las palabras',
+      text:'La semántica estudia el significado de las palabras y las relaciones que estas establecen entre sí. Comprender estas relaciones amplía el vocabulario y mejora la comprensión y producción textual.',
+      key:'Clave: sinónimos = significado similar; antónimos = significado opuesto; polisemia = varios significados; campo semántico = grupo temático.',
+      concepts:[
+        {t:'Sinónimos',d:'Palabras distintas con significado similar (alegre / contento).'},
+        {t:'Antónimos',d:'Palabras de significado contrario (frío / caliente).'},
+        {t:'Polisemia',d:'Una misma palabra tiene varios significados (banco).'},
+        {t:'Campo semántico',d:'Conjunto de palabras relacionadas por un tema común.'}
+      ]
+    },
+    levels:[
+      {
+        mission:'Identifica el sinónimo más preciso.',
+        fragment:'"La decisión fue apresurada y causó muchos problemas."',
+        hint:'Busca la palabra que pueda sustituir a "apresurada" sin cambiar el sentido.',
+        question:'¿Cuál es el mejor sinónimo de "apresurada" en este contexto?',
+        options:[
+          {t:'Planificada',d:'Significado opuesto.'},
+          {t:'Precipitada',d:'Sinónimo apropiado: tomada sin suficiente reflexión.'},
+          {t:'Lenta',d:'Significado contrario.'},
+          {t:'Definitiva',d:'No equivale en este sentido.'}
+        ],
+        correct:1,
+        explanation:'Precipitada es sinónimo de apresurada en este contexto: ambas indican falta de reflexión previa.',
+        remember:'El sinónimo debe encajar en el contexto, no solo en el significado general.',
+        goal:'Aplicar el concepto de sinonimia en un contexto textual.'
+      },
+      {
+        mission:'Detecta el antónimo correcto.',
+        fragment:'"El orador fue muy conciso en su presentación."',
+        hint:'Busca la palabra opuesta en significado a "conciso".',
+        question:'¿Cuál es el antónimo de "conciso"?',
+        options:[
+          {t:'Breve',d:'Es sinónimo, no antónimo.'},
+          {t:'Exacto',d:'No es opuesto en este sentido.'},
+          {t:'Extenso',d:'Opuesto a conciso: largo y desarrollado.'},
+          {t:'Claro',d:'No es el antónimo principal.'}
+        ],
+        correct:2,
+        explanation:'Extenso es el antónimo de conciso porque indica lo contrario: largo, con muchos detalles.',
+        remember:'El antónimo expresa el significado contrario en el mismo campo de significación.',
+        goal:'Reconocer relaciones de antonimia en contexto.'
+      },
+      {
+        mission:'Comprende la polisemia.',
+        fragment:'1. Fui al banco a sacar dinero.\n2. El banco del parque estaba mojado.',
+        hint:'La misma palabra tiene dos significados diferentes según el contexto.',
+        question:'¿Cuál es el fenómeno semántico que ilustran estas dos oraciones?',
+        options:[
+          {t:'Sinonimia',d:'No hay dos palabras distintas, sino una con dos sentidos.'},
+          {t:'Antonimia',d:'No son opuestos.'},
+          {t:'Polisemia',d:'Una misma palabra tiene varios significados.'},
+          {t:'Homonimia',d:'Son palabras distintas con igual pronunciación.'}
+        ],
+        correct:2,
+        explanation:'Es polisemia: "banco" tiene dos significados distintos (entidad financiera / asiento), pero el mismo origen etimológico.',
+        remember:'La polisemia ocurre con una palabra que acumula varios sentidos a lo largo del tiempo.',
+        goal:'Distinguir polisemia de otros fenómenos semánticos.'
+      },
+      {
+        mission:'Identifica el campo semántico.',
+        fragment:'Bisturí, estetoscopio, receta, paciente, diagnóstico, quirófano.',
+        hint:'Todas las palabras comparten relación con el mismo ámbito o actividad.',
+        question:'¿A qué campo semántico pertenecen estas palabras?',
+        options:[
+          {t:'Campo de la educación',d:'No corresponde a ese ámbito.'},
+          {t:'Campo de la medicina',d:'Todas se relacionan con el ámbito médico o sanitario.'},
+          {t:'Campo de la tecnología',d:'No hay relación directa.'},
+          {t:'Campo de la gastronomía',d:'No pertenecen a ese campo.'}
+        ],
+        correct:1,
+        explanation:'Todas las palabras pertenecen al campo semántico de la medicina, pues se relacionan con esa actividad.',
+        remember:'El campo semántico agrupa palabras por su relación temática, no por su categoría gramatical.',
+        goal:'Identificar el campo semántico a partir de un conjunto de palabras.'
+      },
+      {
+        mission:'Aplica la semántica en contexto.',
+        fragment:'"El tiempo vuela cuando uno está ocupado."',
+        hint:'El verbo "vuela" no se usa en su sentido habitual aquí.',
+        question:'¿Qué fenómeno semántico muestra el uso de "vuela" en esta oración?',
+        options:[
+          {t:'Antonimia',d:'No hay opuesto semántico.'},
+          {t:'Sentido figurado o metafórico',d:'El verbo adquiere un significado no literal.'},
+          {t:'Sinonimia',d:'No hay dos palabras equivalentes.'},
+          {t:'Campo semántico',d:'No se trata de agrupación temática.'}
+        ],
+        correct:1,
+        explanation:'El verbo "volar" se usa en sentido figurado para expresar que el tiempo pasa muy rápido.',
+        remember:'El sentido figurado se apoya en la polisemia y la metáfora para enriquecer el lenguaje.',
+        goal:'Reconocer el uso figurado del léxico como fenómeno semántico.'
+      }
+    ]
+  },
+  5:{
+    name:'Laboratorio Morfológico',
+    lesson:{
+      icon:'⚗️',
+      title:'Morfología: categorías gramaticales',
+      text:'La morfología estudia la forma y la función de las palabras. Reconocer las categorías gramaticales es fundamental para analizar oraciones y construir textos con precisión.',
+      key:'Clave: sustantivo = nombra; adjetivo = caracteriza; verbo = expresa acción o estado; adverbio = modifica al verbo o adjetivo.',
+      concepts:[
+        {t:'Sustantivo',d:'Nombre de personas, animales, cosas o ideas.'},
+        {t:'Adjetivo',d:'Acompaña al sustantivo y lo caracteriza.'},
+        {t:'Verbo',d:'Expresa acción, estado o proceso.'},
+        {t:'Adverbio',d:'Modifica al verbo, adjetivo u otro adverbio.'}
+      ]
+    },
+    levels:[
+      {
+        mission:'Identifica el sustantivo.',
+        fragment:'"La niña corrió rápidamente hacia el jardín florido."',
+        hint:'El sustantivo nombra personas, animales, lugares o cosas.',
+        question:'¿Cuáles son los sustantivos en esta oración?',
+        options:[
+          {t:'Corrió y florido',d:'Son verbo y adjetivo.'},
+          {t:'Niña y jardín',d:'Ambos son sustantivos: nombran una persona y un lugar.'},
+          {t:'Rápidamente y florido',d:'Son adverbio y adjetivo.'},
+          {t:'La y hacia',d:'Son artículo y preposición.'}
+        ],
+        correct:1,
+        explanation:'Niña y jardín son los sustantivos: nombran la persona protagonista y el lugar respectivamente.',
+        remember:'Los sustantivos pueden ir acompañados de artículos (la, el, un, una).',
+        goal:'Reconocer el sustantivo dentro de una oración.'
+      },
+      {
+        mission:'Identifica el adjetivo.',
+        fragment:'"Un cielo despejado y una brisa suave hacían la tarde perfecta."',
+        hint:'El adjetivo describe o califica al sustantivo.',
+        question:'¿Cuáles son los adjetivos en esta oración?',
+        options:[
+          {t:'Cielo, brisa, tarde',d:'Son sustantivos.'},
+          {t:'Despejado, suave, perfecta',d:'Los tres califican a un sustantivo.'},
+          {t:'Un, una, la',d:'Son artículos.'},
+          {t:'Hacían',d:'Es verbo.'}
+        ],
+        correct:1,
+        explanation:'Despejado, suave y perfecta son adjetivos porque califican a cielo, brisa y tarde respectivamente.',
+        remember:'El adjetivo concuerda en género y número con el sustantivo al que acompaña.',
+        goal:'Identificar adjetivos y su función dentro de la oración.'
+      },
+      {
+        mission:'Reconoce la función del verbo.',
+        fragment:'"Los estudiantes prepararon su proyecto durante tres semanas."',
+        hint:'El verbo expresa la acción que realizan los sujetos.',
+        question:'¿Cuál es el verbo principal de la oración?',
+        options:[
+          {t:'Estudiantes',d:'Es el sustantivo sujeto.'},
+          {t:'Prepararon',d:'Es el verbo: expresa la acción realizada por los estudiantes.'},
+          {t:'Proyecto',d:'Es el sustantivo objeto.'},
+          {t:'Durante',d:'Es una preposición.'}
+        ],
+        correct:1,
+        explanation:'"Prepararon" es el verbo principal porque expresa la acción que realizan los estudiantes.',
+        remember:'El verbo suele estar en el núcleo del predicado y puede conjugarse.',
+        goal:'Identificar el verbo como núcleo del predicado.'
+      },
+      {
+        mission:'Distingue el adverbio.',
+        fragment:'"El pianista tocó magistralmente la pieza más difícil del recital."',
+        hint:'El adverbio modifica la acción expresada por el verbo.',
+        question:'¿Cuál es el adverbio en esta oración?',
+        options:[
+          {t:'Pianista',d:'Es el sustantivo.'},
+          {t:'Magistralmente',d:'Modifica al verbo "tocó": indica cómo lo hizo.'},
+          {t:'Difícil',d:'Es un adjetivo.'},
+          {t:'Pieza',d:'Es un sustantivo.'}
+        ],
+        correct:1,
+        explanation:'Magistralmente es un adverbio de modo que modifica al verbo tocó.',
+        remember:'Muchos adverbios de modo terminan en -mente.',
+        goal:'Reconocer el adverbio y su función modificadora.'
+      },
+      {
+        mission:'Completa el análisis morfológico.',
+        fragment:'"El anciano sabio caminaba lentamente por la plaza tranquila."',
+        hint:'Identifica la categoría gramatical de cada palabra señalada.',
+        question:'¿Cuál es el análisis correcto de las palabras subrayadas: "sabio" y "lentamente"?',
+        options:[
+          {t:'Sabio: adjetivo; lentamente: adverbio',d:'Sabio califica al anciano; lentamente modifica al verbo.'},
+          {t:'Sabio: sustantivo; lentamente: adjetivo',d:'No corresponde a la función de ninguno.'},
+          {t:'Sabio: verbo; lentamente: sustantivo',d:'Incorrecto para ambas palabras.'},
+          {t:'Sabio: adverbio; lentamente: adjetivo',d:'Las funciones están invertidas.'}
+        ],
+        correct:0,
+        explanation:'"Sabio" es adjetivo porque califica al sustantivo "anciano"; "lentamente" es adverbio de modo.',
+        remember:'Analiza la función de cada palabra en relación con las demás.',
+        goal:'Consolidar el análisis de categorías gramaticales en contexto.'
+      }
+    ]
+  },
+  6:{
+    name:'Clásicos del Mundo',
+    lesson:{
+      icon:'🌍',
+      title:'Literatura universal: épica, novela, lírica y teatro',
+      text:'La literatura universal abarca obras de distintas culturas y épocas que han marcado la historia de la humanidad. Conocerlas enriquece la comprensión del mundo y de la condición humana.',
+      key:'Clave: épica = grandes hazañas heroicas; novela = extenso relato en prosa; lírica = expresión poética subjetiva; teatro = texto para representar.',
+      concepts:[
+        {t:'Épica',d:'Narra grandes hazañas de héroes culturales o históricos.'},
+        {t:'Novela',d:'Relato extenso en prosa con múltiples personajes y tramas.'},
+        {t:'Lírica',d:'Expresa la subjetividad del poeta mediante el verso.'},
+        {t:'Teatro',d:'Texto organizado en actos y escenas para ser representado.'}
+      ]
+    },
+    levels:[
+      {
+        mission:'Identifica la obra épica.',
+        fragment:'"Canta, oh diosa, la cólera del pélida Aquiles, cólera funesta que causó infinitos males a los aqueos..."',
+        hint:'Es el inicio de un poema griego que narra una guerra legendaria.',
+        question:'¿A qué obra pertenece este inicio?',
+        options:[
+          {t:'La Odisea',d:'Trata del regreso de Odiseo, no de la cólera de Aquiles.'},
+          {t:'La Ilíada',d:'Poema épico de Homero que narra la Guerra de Troya.'},
+          {t:'La Eneida',d:'Épica latina de Virgilio sobre los orígenes de Roma.'},
+          {t:'El cantar del Mío Cid',d:'Épica castellana medieval.'}
+        ],
+        correct:1,
+        explanation:'Es La Ilíada de Homero, que abre con la invocación a la musa y el tema central: la cólera de Aquiles.',
+        remember:'Los poemas épicos comienzan con la invocación a la musa y la declaración del tema.',
+        goal:'Reconocer rasgos de la épica griega y relacionarlos con una obra.'
+      },
+      {
+        mission:'Asocia obra y género.',
+        fragment:'"En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero..."',
+        hint:'Este inicio es uno de los más famosos de la literatura occidental.',
+        question:'¿A qué género y obra pertenece este fragmento?',
+        options:[
+          {t:'Teatro — El alcalde de Zalamea',d:'El alcalde de Zalamea es teatro, no novela.'},
+          {t:'Épica — El cantar del Mío Cid',d:'El Cid es poesía épica medieval.'},
+          {t:'Novela — Don Quijote de la Mancha',d:'Es la primera novela moderna, de Cervantes.'},
+          {t:'Lírica — Rimas de Gustavo Adolfo Bécquer',d:'Las Rimas son poesía, no narración en prosa.'}
+        ],
+        correct:2,
+        explanation:'Es Don Quijote de la Mancha de Miguel de Cervantes, considerada la primera novela moderna.',
+        remember:'El inicio de una novela suele presentar al protagonista y el lugar donde vive.',
+        goal:'Relacionar un fragmento célebre con su obra y género literario.'
+      },
+      {
+        mission:'Reconoce el género dramático.',
+        fragment:'ROMEO: ¿Pero qué luz es esa que atraviesa esa ventana? Es el oriente, ¡y Julieta es el sol!\nJULIETA: ¡Oh Romeo, Romeo! ¿Por qué eres tú Romeo?',
+        hint:'El texto se organiza en parlamentos de personajes para ser representado.',
+        question:'¿A qué género literario y obra pertenece este fragmento?',
+        options:[
+          {t:'Novela — Romeo y Julieta',d:'No es una novela; se estructura en parlamentos escénicos.'},
+          {t:'Teatro — Romeo y Julieta de Shakespeare',d:'Drama del siglo XVI organizado en actos y escenas.'},
+          {t:'Épica — Romeo y Julieta',d:'No es una epopeya de hazañas heroicas.'},
+          {t:'Lírica — Romeo y Julieta',d:'La lírica no tiene parlamentos de personajes.'}
+        ],
+        correct:1,
+        explanation:'Es teatro: Romeo y Julieta de William Shakespeare, organizado en actos y parlamentos dramáticos.',
+        remember:'El género dramático se identifica por la voz directa de los personajes sin narrador.',
+        goal:'Reconocer rasgos del teatro isabelino inglés.'
+      },
+      {
+        mission:'Identifica el poema lírico.',
+        fragment:'"Volverán las oscuras golondrinas\nen tu balcón sus nidos a colgar,\ny otra vez con el ala a sus cristales\njugando llamarán..."',
+        hint:'El yo poético expresa nostalgia y emoción mediante versos con musicalidad.',
+        question:'¿Cuál es la obra y el género?',
+        options:[
+          {t:'Teatro — El burlador de Sevilla',d:'El burlador es teatro del Siglo de Oro.'},
+          {t:'Novela — La Regenta',d:'La Regenta es novela realista.'},
+          {t:'Épica — Cantar de Roldán',d:'El Cantar de Roldán es épica medieval francesa.'},
+          {t:'Lírica — Rimas de Gustavo Adolfo Bécquer',d:'Poema de las Rimas que expresa la emoción amorosa.'}
+        ],
+        correct:3,
+        explanation:'Es la Rima LIII de Gustavo Adolfo Bécquer, lírica romántica que expresa el dolor por un amor perdido.',
+        remember:'La lírica se reconoce por su musicalidad, subjetividad y uso del verso.',
+        goal:'Relacionar un fragmento lírico con su obra y movimiento literario.'
+      },
+      {
+        mission:'Completa el viaje literario.',
+        fragment:'"Gregor Samsa descubrió una mañana, al despertar de un sueño intranquilo, que se había convertido en un monstruoso insecto."',
+        hint:'Este inicio pertenece a una de las obras más influyentes de la literatura del siglo XX.',
+        question:'¿A qué obra y género corresponde?',
+        options:[
+          {t:'Teatro — El proceso',d:'El proceso es novela, no teatro.'},
+          {t:'Épica — La metamorfosis',d:'No es una epopeya heroica.'},
+          {t:'Novela corta — La metamorfosis de Franz Kafka',d:'Es un relato extenso del expresionismo alemán.'},
+          {t:'Lírica — La metamorfosis',d:'No tiene estructura poética.'}
+        ],
+        correct:2,
+        explanation:'Es La metamorfosis de Franz Kafka, novela corta expresionista que narra la transformación de Gregor Samsa.',
+        remember:'El siglo XX produjo obras que rompieron los moldes narrativos clásicos.',
+        goal:'Consolidar el reconocimiento de obras y géneros en la literatura universal.'
+      }
+    ]
+  }
+};
+
+/* ══════════════════════════════════
+   STATE
+══════════════════════════════════ */
+const MAX_LIVES = 3;
+const LEVEL_TIME = 25;
+let curWorld = 1;
+let curLevel = 0;
+let score = 0;
+let lives = MAX_LIVES;
+let chosen = null;
+let timerID = null;
+let timeLeft = LEVEL_TIME;
+let soundOn = true;
+let ac = null;
+
+/* ══════════════════════════════════
+   UTILS
+══════════════════════════════════ */
+const $ = id => document.getElementById(id);
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+/* ══════════════════════════════════
+   AUDIO (Web Audio API)
+══════════════════════════════════ */
+function initAC(){
+  if(!ac){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC) ac = new AC();
+  }
+  if(ac && ac.state === 'suspended') ac.resume();
+}
+function beep(f=440,d=.12,t='sine',v=.03){
+  if(!soundOn) return;
+  initAC();
+  if(!ac) return;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = t; o.frequency.value = f; g.gain.value = v;
+  o.connect(g); g.connect(ac.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + d);
+  o.stop(ac.currentTime + d);
+}
+function sndStart(){ beep(520,.08,'sine',.025); setTimeout(()=>beep(740,.1,'sine',.025),70); }
+function sndSelect(){ beep(600,.04,'square',.015); }
+function sndOk(){ beep(660,.08,'triangle',.03); setTimeout(()=>beep(880,.1,'triangle',.03),70); setTimeout(()=>beep(1100,.14,'triangle',.03),150); }
+function sndFail(){ beep(220,.14,'sawtooth',.03); setTimeout(()=>beep(160,.18,'sawtooth',.025),90); }
+function sndTick(){ beep(520,.03,'square',.01); }
+
+function toggleSound(){
+  soundOn = !soundOn;
+  $('soundBtn').textContent = soundOn ? '🔊 Sonido ON' : '🔇 Sonido OFF';
+  if(soundOn) sndStart();
+}
+
+/* ══════════════════════════════════
+   TIMER
+══════════════════════════════════ */
+function clearTmr(){ if(timerID){ clearInterval(timerID); timerID = null; } }
+function updateTimerUI(){
+  $('timerText').textContent = `${timeLeft} s`;
+  $('timerBar').style.width = `${Math.max(0,(timeLeft/LEVEL_TIME)*100)}%`;
+}
+function startTimer(){
+  clearTmr(); timeLeft = LEVEL_TIME; updateTimerUI();
+  timerID = setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if(timeLeft <= 5 && timeLeft > 0) sndTick();
+    if(timeLeft <= 0){ clearTmr(); onTimeout(); }
+  },1000);
+}
+function onTimeout(){
+  lives--;
+  renderLives();
+  sndFail();
+  if(lives <= 0){
+    showFB(false,'⏰ Tiempo agotado','Sin tiempo y sin vidas. Vuelves al inicio.');
+    setTimeout(()=>{ resetState(); show('intro'); hideFB(); },2800);
+  } else {
+    showFB(false,'⏰ Tiempo agotado',`No respondiste a tiempo. Vidas restantes: ${lives}.`);
+  }
+}
+
+/* ══════════════════════════════════
+   STATE MANAGEMENT
+══════════════════════════════════ */
+function resetState(){ clearTmr(); score=0; lives=MAX_LIVES; curLevel=0; chosen=null; }
+function goHome(){ clearTmr(); hideFB(); show('intro'); }
+function renderLives(){ $('livesDisplay').textContent = '❤️'.repeat(lives)+'🖤'.repeat(Math.max(0,MAX_LIVES-lives)); }
+
+/* ══════════════════════════════════
+   WORLD START / LESSON
+══════════════════════════════════ */
+function startWorld(id){
+  curWorld = id; curLevel = 0; score = 0; lives = MAX_LIVES; chosen = null;
+  const L = WORLDS[id].lesson;
+  $('lessonIcon').textContent = L.icon;
+  $('lessonTitle').textContent = L.title;
+  $('lessonText').textContent = L.text;
+  $('lessonKey').textContent = L.key;
+  $('lessonConcepts').innerHTML = L.concepts.map(c=>`
+    <div class="concept-card">
+      <h4>${c.t}</h4>
+      <p>${c.d}</p>
+    </div>
+  `).join('');
+  show('lesson');
+}
+
+/* ══════════════════════════════════
+   GAME
+══════════════════════════════════ */
+function startGame(){ show('game'); sndStart(); loadLevel(); }
+
+function loadLevel(){
+  clearTmr();
+  const W = WORLDS[curWorld];
+  const lv = W.levels[curLevel];
+  chosen = null;
+  $('levelLabel').textContent = `${W.name} — Nivel ${curLevel+1} / ${W.levels.length}`;
+  $('progFill').style.width = `${((curLevel+1)/W.levels.length)*100}%`;
+  $('scoreDisplay').textContent = score;
+  $('playerChip').textContent = playerName || 'Jugador';
+  renderLives();
+  $('missionText').textContent = lv.mission;
+  $('fragmentBox').textContent = lv.fragment;
+  $('hintBox').textContent = `💡 Pista: ${lv.hint}`;
+  $('questionText').textContent = lv.question;
+  $('rememberText').textContent = lv.remember;
+  $('goalText').textContent = lv.goal;
+  $('optionsBox').innerHTML = '';
+  lv.options.forEach((op,i)=>{
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML = `<div class="opt-title">${op.t}</div><div class="opt-desc">${op.d}</div>`;
+    el.onclick = ()=>selectOpt(i);
+    $('optionsBox').appendChild(el);
+  });
+  startTimer();
+}
+
+function selectOpt(i){
+  chosen = i; sndSelect();
+  document.querySelectorAll('.opt').forEach((el,j)=>el.classList.toggle('chosen', j===i));
+}
+
+function clearSelection(){
+  chosen = null;
+  document.querySelectorAll('.opt').forEach(el=>el.classList.remove('chosen','correct','wrong'));
+}
+
+function checkAnswer(){
+  const lv = WORLDS[curWorld].levels[curLevel];
+  if(chosen === null){
+    showFB(false,'✏️ Elige una opción','Selecciona una respuesta antes de continuar.');
+    return;
+  }
+  clearTmr();
+  document.querySelectorAll('.opt').forEach((el,i)=>{
+    el.classList.remove('correct','wrong');
+    if(i===lv.correct) el.classList.add('correct');
+    if(i===chosen && i!==lv.correct) el.classList.add('wrong');
+  });
+  if(chosen === lv.correct){
+    score += 100;
+    $('scoreDisplay').textContent = score;
+  $('playerChip').textContent = playerName || 'Jugador';
+    sndOk(); spawnConfetti();
+    const last = curLevel === WORLDS[curWorld].levels.length - 1;
+    if(last){
+      showFB(true,'🏆 ¡Mundo completado!',`${lv.explanation} Has completado todos los niveles de este mundo.`, true);
+    } else {
+      showFB(true,'🎉 ¡Correcto!',`${lv.explanation}`);
+    }
+  } else {
+    lives--; renderLives(); sndFail();
+    if(lives <= 0){
+      showFB(false,'📕 Juego terminado',`${lv.explanation} Te quedaste sin vidas.`);
+      setTimeout(()=>{ resetState(); show('intro'); hideFB(); },2800);
+    } else {
+      showFB(false,'❌ Respuesta incorrecta',`${lv.explanation} Vidas restantes: ${lives}.`);
+    }
+  }
+}
+
+function nextLevel(){
+  hideFB(); curLevel++;
+  if(curLevel >= WORLDS[curWorld].levels.length){
+    clearTmr();
+    $('completeFinalScore').textContent = `${score} pts`;
+    $('completeSub').textContent = `Has completado "${WORLDS[curWorld].name}" con éxito. ¡Excelente trabajo!`;
+    show('complete');
+    spawnConfetti(); sndOk();
+    return;
+  }
+  loadLevel();
+}
+function retryLevel(){ hideFB(); loadLevel(); }
+
+/* ══════════════════════════════════
+   FEEDBACK OVERLAY
+══════════════════════════════════ */
+function showFB(ok,title,msg,worldEnd=false){
+  $('fbOverlay').classList.add('show');
+  $('fbIcon').textContent = ok ? (worldEnd?'🏆':'🎉') : '📕';
+  $('fbTitle').textContent = title;
+  $('fbMsg').textContent = msg;
+  const nb = $('nextBtn');
+  nb.style.display = ok ? '' : 'none';
+  nb.textContent = worldEnd ? 'Ver resultado' : 'Siguiente nivel';
+  nb.onclick = worldEnd ? ()=>{ hideFB(); nextLevel(); } : nextLevel;
+}
+function hideFB(){ $('fbOverlay').classList.remove('show'); $('nextBtn').onclick = nextLevel; $('nextBtn').style.display=''; }
+
+/* ══════════════════════════════════
+   CONFETTI
+══════════════════════════════════ */
+function spawnConfetti(){
+  const cols = ['#c9962e','#e8bc52','#a84b2a','#4a6e45','#3d6680','#7a5c8a','#f0e6cc'];
+  for(let i=0;i<70;i++){
+    const d = document.createElement('div');
+    d.className = 'confetti-dot';
+    d.style.cssText = `
+      left:${Math.random()*100}vw;top:-20px;
+      width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      animation-duration:${1.4+Math.random()*1.1}s;
+    `;
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),2600);
+  }
+}
+
+/* ══════════════════════════════════
+   FLOATIES
+══════════════════════════════════ */
+function spawnFloaties(){
+  const syms = ['✒️','📜','⚗️','📖','🔤','💬','🌍','⭐','✦','❦','§','¶'];
+  setInterval(()=>{
+    const el = document.createElement('div');
+    el.className = 'floaty';
+    el.textContent = syms[Math.floor(Math.random()*syms.length)];
+    el.style.cssText = `
+      left:${Math.random()*96}vw;
+      font-size:${22+Math.random()*28}px;
+      animation-duration:${12+Math.random()*10}s;
+    `;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),22000);
+  },1100);
+}
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+/* ══════════════════════════════════
+   NAME ENTRY
+══════════════════════════════════ */
+let playerName = '';
+
+function submitName(){
+  const val = $('playerNameInput').value.trim();
+  if(!val){
+    $('playerNameInput').style.borderColor = 'var(--terra)';
+    $('playerNameInput').placeholder = '⚠️ Escribe tu nombre primero...';
+    return;
+  }
+  playerName = val;
+  $('playerChip').textContent = playerName;
+  show('intro');
+}
+
+// Allow Enter key on name input
+document.addEventListener('DOMContentLoaded', ()=>{
+  const inp = $('playerNameInput');
+  if(inp) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') submitName(); });
+});
+
+spawnFloaties();
+renderLives();
+updateTimerUI();
+</script>
+</body>
+
+<script
+  src='https://cdn.jotfor.ms/agent/embedjs/019ddab0aa4d782d8e46c0cc54dae6e340e8/embed.js?autoOpenChatIn=1'>
+</script>
+
+</html>
